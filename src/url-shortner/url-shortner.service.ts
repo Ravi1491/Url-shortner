@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { CreateUrlShortnerDto } from './dto/create-url-shortner.dto';
-import { UpdateUrlShortnerDto } from './dto/update-url-shortner.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { UrlShortener } from './entities/url-shortner.entity';
@@ -16,19 +15,10 @@ export class UrlShortnerService {
     return this.urlShortnerModel.create(createUrlShortnerDto);
   }
 
-  findAll() {
-    return `This action returns all urlShortner`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} urlShortner`;
-  }
-
-  update(id: number, updateUrlShortnerDto: UpdateUrlShortnerDto) {
-    return `This action updates a #${id} urlShortner`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} urlShortner`;
+  findOne(id: string) {
+    return this.urlShortnerModel.findOneAndUpdate(
+      { shortUrl: id },
+      { $inc: { clicks: 1 } },
+    );
   }
 }

@@ -1,5 +1,5 @@
 export class CreateUrlShortnerDto {
-  url: string;
-  shortUrl: string;
-  clicks: number;
+  originalUrl: string;
+  shortCode: string;
+  clickCount: number;
 }

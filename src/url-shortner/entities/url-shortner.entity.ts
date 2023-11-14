@@ -5,13 +5,13 @@ export type UrlShortenerSchemaDocument = HydratedDocument<UrlShortener>;
 @Schema()
 export class UrlShortener extends Document {
   @Prop()
-  url: string;
+  originalUrl: string;
 
   @Prop({ unique: true, required: true })
-  shortUrl: string;
+  shortCode: string;
 
   @Prop({ default: 0 })
-  clicks: number;
+  clickCount: number;
 }
 
 export const UrlShortenerSchema = SchemaFactory.createForClass(UrlShortener);

@@ -1,15 +1,7 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Res, Query } from '@nestjs/common';
 import { UrlShortnerService } from './url-shortner.service';
-import { UpdateUrlShortnerDto } from './dto/update-url-shortner.dto';
 const shortid = require('shortid');
+import { Response } from 'express';
 
 @Controller('url-shortner')
 export class UrlShortnerController {
@@ -21,34 +13,18 @@ export class UrlShortnerController {
     const generateSlug = shortid.generate();
 
     const createUrlShortner = {
-      url,
-      shortUrl: generateSlug,
-      clicks: 0,
+      originalUrl: url,
+      shortCode: generateSlug,
+      clickCount: 0,
     };
 
     return this.urlShortnerService.create(createUrlShortner);
   }
 
-  @Get()
-  findAll() {
-    return this.urlShortnerService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.urlShortnerService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateUrlShortnerDto: UpdateUrlShortnerDto,
-  ) {
-    return this.urlShortnerService.update(+id, updateUrlShortnerDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.urlShortnerService.remove(+id);
+  @Get('handleRedirect')
+  async findOne(@Query('id') shortId: string, @Res() res: Response) {
+    const url = await this.urlShortnerService.findOne(shortId);
+    const redirectUri = new URL(url.originalUrl);
+    return res.redirect(redirectUri.toString());
   }
 }
