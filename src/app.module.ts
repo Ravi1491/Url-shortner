@@ -11,9 +11,7 @@ import { ConfigModule } from '@nestjs/config';
       envFilePath: '.env',
       isGlobal: true,
     }),
-    MongooseModule.forRoot(
-      'mongodb+srv://ravi1491:ravi1234@cluster0.w9fb89x.mongodb.net/url_shortener',
-    ),
+    MongooseModule.forRoot(process.env.DB_URL),
     UrlShortnerModule,
   ],
   controllers: [AppController],
