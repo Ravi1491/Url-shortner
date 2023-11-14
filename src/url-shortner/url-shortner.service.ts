@@ -15,10 +15,10 @@ export class UrlShortnerService {
     return this.urlShortnerModel.create(createUrlShortnerDto);
   }
 
-  findOne(id: string) {
+  findOne(shortCode: string) {
     return this.urlShortnerModel.findOneAndUpdate(
-      { shortUrl: id },
-      { $inc: { clicks: 1 } },
+      { shortCode },
+      { $inc: { clickCount: 1 } },
     );
   }
 }

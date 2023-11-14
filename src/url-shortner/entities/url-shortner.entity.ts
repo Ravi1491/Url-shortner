@@ -4,7 +4,7 @@ export type UrlShortenerSchemaDocument = HydratedDocument<UrlShortener>;
 
 @Schema()
 export class UrlShortener extends Document {
-  @Prop()
+  @Prop({ required: true })
   originalUrl: string;
 
   @Prop({ unique: true, required: true })
