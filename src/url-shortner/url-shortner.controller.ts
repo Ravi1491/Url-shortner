@@ -3,7 +3,9 @@ import { UrlShortnerService } from './url-shortner.service';
 const shortid = require('shortid');
 import { Response } from 'express';
 import { getSanitizedUrl } from 'src/utils/helper';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('url-shortner')
 @Controller('url-shortner')
 export class UrlShortnerController {
   constructor(private readonly urlShortnerService: UrlShortnerService) {}
