@@ -1,9 +1,20 @@
-import { Controller, Get, Post, Body, Res, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Res,
+  Query,
+  Param,
+} from '@nestjs/common';
 import { UrlShortnerService } from './url-shortner.service';
-const shortid = require('shortid');
+import shortid from 'shortid';
 import { Response } from 'express';
 import { getSanitizedUrl } from 'src/utils/helper';
 import { ApiTags } from '@nestjs/swagger';
+import { CreateUrlShortnerDto } from './dto/create-url-shortner.dto';
 
 @ApiTags('url-shortner')
 @Controller('url-shortner')
@@ -67,5 +78,27 @@ export class UrlShortnerController {
     const redirectUri = new URL(urlShortener.originalUrl);
 
     return res.redirect(redirectUri.toString());
+  }
+
+  @Put('update/:shortCode')
+  async update(
+    @Param('shortCode') shortCode: string,
+    @Body() updateData: Partial<CreateUrlShortnerDto>,
+    @Res() res: Response,
+  ) {
+    const updated = await this.urlShortnerService.update(shortCode, updateData);
+    return res.json(updated);
+  }
+
+  @Delete('delete/:shortCode')
+  async delete(@Param('shortCode') shortCode: string, @Res() res: Response) {
+    const deleted = await this.urlShortnerService.delete(shortCode);
+    return res.json(deleted);
+  }
+
+  @Get('list')
+  async list(@Res() res: Response) {
+    const list = await this.urlShortnerService.list();
+    return res.json(list);
   }
 }
