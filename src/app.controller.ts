@@ -2,6 +2,7 @@ import { Controller, Get, Res, Param } from '@nestjs/common';
 import { AppService } from './app.service';
 import { Response } from 'express';
 import { UrlShortnerService } from './url-shortner/url-shortner.service';
+import { Public } from './auth/decorators/public';
 
 @Controller()
 export class AppController {
@@ -10,11 +11,13 @@ export class AppController {
     private readonly urlShortnerService: UrlShortnerService,
   ) {}
 
+  @Public()
   @Get('health')
   getHello(): string {
     return this.appService.getHello();
   }
 
+  @Public()
   @Get(':shortCode')
   async handleRedirect(
     @Param('shortCode') shortCode: string,

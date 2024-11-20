@@ -18,6 +18,8 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Public } from 'src/auth/decorators/public';
 import { generateJwtToken } from 'src/utils/jwt';
+import { CurrentUser } from 'src/auth/decorators/current-user';
+import { User } from './entities/user.entity';
 
 @Controller('users')
 export class UserController {
@@ -108,10 +110,10 @@ export class UserController {
     }
   }
 
-  @Get(':id')
-  async findOne(@Param('id') id: string) {
+  @Get('/me')
+  async findOne(@CurrentUser() currentUser: User) {
     try {
-      const user = await this.userService.findOne(id);
+      const user = await this.userService.findOne(currentUser.id);
 
       if (!user) {
         throw new HttpException('User not found', HttpStatus.NOT_FOUND);

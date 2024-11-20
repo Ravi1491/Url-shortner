@@ -12,6 +12,9 @@ export class UrlShortener extends Document {
 
   @Prop({ default: 0 })
   clickCount: number;
+
+  @Prop({ required: true })
+  userId: string;
 }
 
 export const UrlShortenerSchema = SchemaFactory.createForClass(UrlShortener);

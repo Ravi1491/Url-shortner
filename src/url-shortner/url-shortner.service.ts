@@ -52,7 +52,7 @@ export class UrlShortnerService {
     return deleted;
   }
 
-  async list() {
-    return this.urlShortnerModel.find();
+  async list(userId: string) {
+    return this.urlShortnerModel.find({ userId });
   }
 }

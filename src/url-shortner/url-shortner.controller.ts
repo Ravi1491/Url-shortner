@@ -10,11 +10,14 @@ import {
   Req,
 } from '@nestjs/common';
 import { UrlShortnerService } from './url-shortner.service';
-import shortid from 'shortid';
 import { Response, Request } from 'express';
 import { getSanitizedUrl } from 'src/utils/helper';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateUrlShortnerDto } from './dto/create-url-shortner.dto';
+import { CurrentUser } from 'src/auth/decorators/current-user';
+import { User } from 'src/user/entities/user.entity';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const nanoid = require('nanoid');
 
 @ApiTags('url-shortner')
 @Controller('url-shortner')
@@ -23,16 +26,19 @@ export class UrlShortnerController {
 
   @Post('create')
   async create(
-    @Body() body: { url: string },
+    @Body() body: { url: string; userId: string },
     @Res() res: Response,
     @Req() req: Request,
   ) {
-    if (!body || !body.url) {
-      return res.status(400).json({ 'Invalid request': 'Please provide url' });
+    if (!body || !body.url || !body.userId) {
+      return res
+        .status(400)
+        .json({ 'Invalid request': 'Please provide url and userId' });
     }
 
     const url = body.url;
-    const generateSlug = shortid.generate();
+    const userId = body.userId;
+    const generateSlug = nanoid.nanoid();
 
     const sanitizedUrl = getSanitizedUrl(url);
 
@@ -40,6 +46,7 @@ export class UrlShortnerController {
       originalUrl: sanitizedUrl,
       shortCode: generateSlug,
       clickCount: 0,
+      userId: userId,
     });
 
     const shortenedUrl = `${req.get('host')}/${generateSlug}`;
@@ -49,18 +56,25 @@ export class UrlShortnerController {
 
   @Post('createCustom')
   async createCustom(
-    @Body() body: { url: string; slug: string },
+    @Body() body: { url: string; slug: string; userId: string },
     @Res() res: Response,
     @Req() req: Request,
   ) {
-    if (!body || !body.url || !body.slug) {
+    if (!body || !body.url || !body.slug || !body.userId) {
       return res
         .status(400)
-        .json({ 'Invalid request': 'Please provide url and slug' });
+        .json({ 'Invalid request': 'Please provide url, slug, and userId' });
     }
 
     const url = body.url;
     const slug = body.slug;
+    const userId = body.userId;
+
+    // Check if the slug is already taken
+    const existingSlug = await this.urlShortnerService.findOne(slug);
+    if (existingSlug) {
+      return res.status(400).json({ 'Invalid request': 'Slug already taken' });
+    }
 
     const sanitizedUrl = getSanitizedUrl(url);
 
@@ -68,6 +82,7 @@ export class UrlShortnerController {
       originalUrl: sanitizedUrl,
       shortCode: slug,
       clickCount: 0,
+      userId: userId,
     });
 
     const shortenedUrl = `${req.get('host')}/${slug}`;
@@ -92,8 +107,8 @@ export class UrlShortnerController {
   }
 
   @Get('list')
-  async list(@Res() res: Response) {
-    const list = await this.urlShortnerService.list();
+  async list(@Res() res: Response, @CurrentUser() currentUser: User) {
+    const list = await this.urlShortnerService.list(currentUser.id);
     return res.json(list);
   }
 }
