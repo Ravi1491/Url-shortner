@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, HydratedDocument } from 'mongoose';
 export type UrlShortenerSchemaDocument = HydratedDocument<UrlShortener>;
 
-@Schema()
+@Schema({ timestamps: true, collection: 'urls' })
 export class UrlShortener extends Document {
   @Prop({ required: true })
   originalUrl: string;
