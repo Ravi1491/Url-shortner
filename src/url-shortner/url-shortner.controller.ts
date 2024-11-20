@@ -6,12 +6,12 @@ import {
   Delete,
   Body,
   Res,
-  Query,
   Param,
+  Req,
 } from '@nestjs/common';
 import { UrlShortnerService } from './url-shortner.service';
 import shortid from 'shortid';
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import { getSanitizedUrl } from 'src/utils/helper';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateUrlShortnerDto } from './dto/create-url-shortner.dto';
@@ -22,7 +22,11 @@ export class UrlShortnerController {
   constructor(private readonly urlShortnerService: UrlShortnerService) {}
 
   @Post('create')
-  async create(@Body() body: { url: string }, @Res() res: Response) {
+  async create(
+    @Body() body: { url: string },
+    @Res() res: Response,
+    @Req() req: Request,
+  ) {
     if (!body || !body.url) {
       return res.status(400).json({ 'Invalid request': 'Please provide url' });
     }
@@ -38,13 +42,16 @@ export class UrlShortnerController {
       clickCount: 0,
     });
 
-    return res.json(urlShortener);
+    const shortenedUrl = `${req.get('host')}/${generateSlug}`;
+
+    return res.json({ ...urlShortener, shortenedUrl });
   }
 
   @Post('createCustom')
   async createCustom(
     @Body() body: { url: string; slug: string },
     @Res() res: Response,
+    @Req() req: Request,
   ) {
     if (!body || !body.url || !body.slug) {
       return res
@@ -63,21 +70,9 @@ export class UrlShortnerController {
       clickCount: 0,
     });
 
-    return res.json(urlShortener);
-  }
+    const shortenedUrl = `${req.get('host')}/${slug}`;
 
-  @Get('handleRedirect')
-  async findOne(@Query('shortCode') shortCode: string, @Res() res: Response) {
-    if (!shortCode) {
-      return res
-        .status(400)
-        .json({ 'Invalid request': 'Please provide shortCode' });
-    }
-
-    const urlShortener = await this.urlShortnerService.findOne(shortCode);
-    const redirectUri = new URL(urlShortener.originalUrl);
-
-    return res.redirect(redirectUri.toString());
+    return res.json({ ...urlShortener, shortenedUrl });
   }
 
   @Put('update/:shortCode')
